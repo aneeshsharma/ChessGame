@@ -35,25 +35,6 @@ const initialState = {
         .map((x) => Array(8).fill(false)),
 };
 
-const validMoves = {
-    WP: (i, j) => {
-        if (i == 6)
-            return [
-                [i - 1, j],
-                [i - 2, j],
-            ];
-        return [[i, j - 1]];
-    },
-    BP: (i, j) => {
-        if (i == 1)
-            return [
-                [i + 1, j],
-                [i + 2, j],
-            ];
-        return [[i, j + 1]];
-    },
-};
-
 class Board extends React.Component {
     constructor(props) {
         super(props);
