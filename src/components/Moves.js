@@ -28,3 +28,5 @@ const validMoves = {
         }
     }
 };
+
+export default validMoves;
