@@ -24,26 +24,16 @@ const winSeq = [
     [2, 4, 6],
 ];
 
-var buttonStyles = [
-    { borderTop: 'none', borderLeft: 'none' },
-    { borderTop: 'none' },
-    { borderTop: 'none', borderRight: 'none' },
-    { borderLeft: 'none' },
-    {},
-    { borderRight: 'none' },
-    { borderBottom: 'none', borderLeft: 'none' },
-    { borderBottom: 'none' },
-    { borderBottom: 'none', borderRight: 'none' },
-];
-
 const initialState = {
     boardState: initialBoard,
     turn: 'X',
     active: true,
     winText: null,
     checks: false,
+    highlightState: Array(8)
+        .fill('')
+        .map((x) => Array(8).fill(false)),
 };
-
 
 class Board extends React.Component {
     constructor(props) {
@@ -62,138 +52,27 @@ class Board extends React.Component {
         });
     };
 
-    componentDidUpdate() {
-        if (!this.state.active) {
-            return;
-        }
-        if (!this.state.checks) {
-            if (this.checkWinCondition('O')) {
-                var computer = this.state.computer;
-                this.setState({
-                    active: false,
-                    winText: 'Computer wins!',
-                    computer: computer + 1,
-                });
-            } else if (this.checkWinCondition('X')) {
-                var you = this.state.you;
-                this.setState({
-                    active: false,
-                    winText: 'You win!',
-                    you: you + 1,
-                });
-            } else if (this.checkDrawCondition()) {
-                this.setState({
-                    active: false,
-                    winText: 'Game is Draw',
-                });
-            }
-            this.setState({
-                checks: true,
-            });
-        }
-        if (this.state.checks) {
-            this.computerMoves();
-        }
-    }
-
-    computerMoves = () => {
+    handleClick = (i, j) => {
         if (!this.state.active) return;
-        if (this.state.turn === 'X') return;
+        console.log(i, j);
         var board = this.state.boardState;
-        var moved = false;
+        var name = board[i][j];
+        var movesFunc = validMoves[name];
+        if (!movesFunc) return;
 
-        for (var seq of winSeq) {
-            var inPos = [];
-            for (var i of seq) {
-                if (board[i] === 'O') {
-                    inPos.push(i);
-                }
-            }
-            if (inPos.length >= 2) {
-                for (i of seq) {
-                    if (!inPos.includes(i) && board[i] === null) {
-                        this.handleMove(i);
-                        moved = true;
-                        return;
-                    }
-                }
-            }
-        }
+        var moves = movesFunc(i, j);
+        console.log(moves);
 
-        if (moved) return;
+        var hl = this.state.highlightState;
 
-        for (var seq of winSeq) {
-            var inPos = [];
-            for (var i of seq) {
-                if (board[i] === 'X') {
-                    inPos.push(i);
-                }
-            }
-            if (inPos.length >= 2) {
-                for (i of seq) {
-                    if (!inPos.includes(i) && board[i] === null) {
-                        this.handleMove(i);
-                        moved = true;
-                        return;
-                    }
-                }
-            }
-        }
-
-        if (moved) return;
-
-        while (!moved) {
-            var random = Math.floor(Math.random() * 9);
-            if (board[random] === null) {
-                this.handleMove(random);
-                moved = true;
-            }
-        }
-    };
-
-    checkDrawCondition = () => {
-        if (this.state.active) {
-            if (this.state.boardState.filter((v) => v === null).length === 0)
-                return true;
-        }
-        return false;
-    };
-
-    checkWinCondition = (turn) => {
-        var board = this.state.boardState;
-        var flag = false;
-        for (var seq of winSeq) {
-            flag = true;
-            for (var i of seq) {
-                if (board[i] !== turn) {
-                    flag = false;
-                    break;
-                }
-            }
-            if (flag) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    handleMove = (index) => {
-        if (!this.state.active) return;
-        var turn = this.state.turn;
-        var boardState = this.state.boardState;
-        if (boardState[index] !== null) return;
-
-        boardState[index] = turn;
-        if (turn === 'X') {
-            turn = 'O';
-        } else {
-            turn = 'X';
-        }
+        moves.forEach((n, index) => {
+            var ni = n[0];
+            var nj = n[1];
+            hl[ni][nj] = true;
+        });
 
         this.setState({
-            boardState,
-            turn,
-            checks: false,
+            highlightState: hl,
         });
     };
 
@@ -205,14 +84,18 @@ class Board extends React.Component {
     renderGrid = () => {
         var buttons = this.state.boardState.map((row, i) => {
             return row.map((col, j) => {
+                var border = this.state.highlightState[i][j]
+                    ? '1px solid yellow'
+                    : 'none';
                 return (
                     <button
                         onClick={() => {
-                            this.handleMove(j);
+                            this.handleClick(i, j);
                         }}
                         style={{
                             background: this.getColor(i, j),
                             color: col && col[0] == 'W' ? 'white' : 'black',
+                            border,
                         }}
                     >
                         {col && col[1]}
