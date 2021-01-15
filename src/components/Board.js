@@ -2,6 +2,8 @@ import React from 'react';
 
 import '../stylesheets/board.css';
 
+import validMoves from './Moves.js';
+
 const initialBoard = [
     ['BR', 'BK', 'BB', 'BQ', 'BX', 'BB', 'BK', 'BR'],
     ['BP', 'BP', 'BP', 'BP', 'BP', 'BP', 'BP', 'BP'],
@@ -11,17 +13,6 @@ const initialBoard = [
     [null, null, null, null, null, null, null, null],
     ['WP', 'WP', 'WP', 'WP', 'WP', 'WP', 'WP', 'WP'],
     ['WR', 'WK', 'WB', 'WQ', 'WX', 'WB', 'WK', 'WR'],
-];
-
-const winSeq = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
 ];
 
 const initialState = {
@@ -63,11 +54,12 @@ class Board extends React.Component {
         var moves = movesFunc(i, j);
         console.log(moves);
 
-        var hl = this.state.highlightState;
+        var hl = Array(8).fill('').map((x) => Array(8).fill(false));
 
         moves.forEach((n, index) => {
             var ni = n[0];
             var nj = n[1];
+            console.log(ni, nj);
             hl[ni][nj] = true;
         });
 
@@ -94,7 +86,7 @@ class Board extends React.Component {
                         }}
                         style={{
                             background: this.getColor(i, j),
-                            color: col && col[0] == 'W' ? 'white' : 'black',
+                            color: col && col[0] === 'W' ? 'white' : 'black',
                             border,
                         }}
                     >
